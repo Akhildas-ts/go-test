@@ -41,3 +41,41 @@ func SignUp(c *gin.Context) {
 	c.JSON(http.StatusCreated, successRes)
 
 }
+
+func Login(c *gin.Context) {
+
+	var userLogin models.LoginDetails
+
+	if err := c.ShouldBindJSON(&userLogin); err != nil {
+
+		errRes := response.ClientResponse(http.StatusBadRequest, "json formte was incorrect", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	if err := validator.New().Struct(userLogin); err != nil {
+		erres := response.ClientResponse(http.StatusBadGateway, "Login field was wrong formate ahn", nil, err.Error())
+		c.JSON(http.StatusBadGateway, erres)
+		return
+	}
+
+	login, err := usecase.LoginUser(userLogin)
+
+	if err != nil {
+
+		errRes := response.ClientResponse(http.StatusBadRequest, "login error", nil, err.Error())
+
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	succesRes := response.ClientResponse(http.StatusOK, "login succesfully", login, nil)
+	c.JSON(http.StatusOK, succesRes)
+
+}
+
+func SelectApp(c *gin.Context) {
+
+	
+
+}

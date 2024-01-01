@@ -10,5 +10,7 @@ import (
 func UserRouter(r *gin.RouterGroup, db *gorm.DB) {
 
 	r.POST("/signup", handlers.SignUp)
+	r.POST("/login",handlers.Login)
+	r.POST("/select-app",handlers.SelectApp)
 
 }

@@ -20,3 +20,18 @@ type TokenUser struct {
 	AccesToken  string
 	RefresToken string
 }
+
+type LoginDetails struct {
+	Email     string `json:"email" validate:"email"`
+	Passoword string `json:"password" validate:"min=8,max=20"`
+}
+
+type UserLoginResponse struct {
+	Id        uint   `json:"id"`
+	UserId    uint   `json:"user_id"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	Password  string `json:"password"`
+}

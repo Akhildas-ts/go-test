@@ -58,3 +58,17 @@ func SignupInsert(user models.SignupDetail) (models.SignupDetailResponse, error)
 	return signupRes, nil
 
 }
+
+func FindUserDetailByEmail(user models.LoginDetails) (models.UserLoginResponse, error) {
+
+	var userDetails models.UserLoginResponse
+
+	err := database.DB.Raw(`SELECT * FROM users WHERE email =? AND blocked = false`, user.Email).Scan(&userDetails).Error
+
+	if err != nil {
+
+		return models.UserLoginResponse{}, err
+	}
+
+	return userDetails,nil
+}
