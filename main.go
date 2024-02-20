@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Set the start date to June 1, 2023
-	startDate := time.Date(2024, time.January, 20, 0, 0, 0, 0, time.UTC)
+	startDate := time.Date(2024, time.February, 20, 0, 0, 0, 0, time.UTC)
 	endDate := time.Now()
 
 	for currentDate := startDate; currentDate.Before(endDate); currentDate = currentDate.AddDate(0, 0, 1) {
