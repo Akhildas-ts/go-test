@@ -9,6 +9,6 @@ import (
 
 func UserRouter(r *gin.RouterGroup, db *gorm.DB) {
 
-	fmt.Println("im akhil")
+	r.POST("/signup",handlers.SignUp)
 
 }
