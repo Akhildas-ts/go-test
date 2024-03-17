@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"fmt"
+	"lock/handlers"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -9,6 +9,6 @@ import (
 
 func UserRouter(r *gin.RouterGroup, db *gorm.DB) {
 
-	r.POST("/signup",handlers.SignUp)
+	r.POST("/signup", handlers.SignUp)
 
 }

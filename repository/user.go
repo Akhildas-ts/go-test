@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"lock/database"
 	"lock/domain"
+	"lock/models"
 
 	"gorm.io/gorm"
 )
@@ -40,4 +41,20 @@ func ChechingPhoneExist(phone string) (*domain.User, error) {
 	}
 
 	return &user, nil
+}
+
+func SignupInsert(user models.SignupDetail) (models.SignupDetailResponse, error) {
+
+	var signupRes models.SignupDetailResponse
+
+	err := database.DB.Raw("INSERT INTO users(firstname, lastname, email, phone, password) VALUES (?,?,?,?,?) RETURNING id,firstname,lastname,email,phone", user.FirstName, user.LastName, user.Email, user.Phone, user.Password).Scan(&signupRes).Error
+
+	if err != nil {
+		fmt.Println(err, "asd")
+		return models.SignupDetailResponse{}, err
+	}
+
+	fmt.Println("signup inserted data's are :", signupRes)
+	return signupRes, nil
+
 }

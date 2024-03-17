@@ -2,6 +2,8 @@ package domain
 
 import "gorm.io/gorm"
 
+var DB *gorm.Model
+
 type User struct {
 	*gorm.Model `json:"-"`
 	ID          uint   `json:"id" gorm:"unique;not null"`

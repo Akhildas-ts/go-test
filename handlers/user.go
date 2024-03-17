@@ -3,6 +3,7 @@ package handlers
 import (
 	"lock/models"
 	"lock/response"
+	"lock/usecase"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -28,8 +29,7 @@ func SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 	}
-
-	usercreate, err := usecase.UsersingUp(usersign)
+	usercreate, err := usecase.UsersignUp(usersign)
 
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadGateway, "user signup format error ", nil, err.Error())
@@ -41,4 +41,3 @@ func SignUp(c *gin.Context) {
 	c.JSON(http.StatusCreated, successRes)
 
 }
-
