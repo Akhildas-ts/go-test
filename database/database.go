@@ -13,7 +13,7 @@ var DB *mongo.Database
 
 func ConnectDatabase(cfg config.Config) (*mongo.Database, error) {
 	// Set up MongoDB client options
-	clientOptions := options.Client().ApplyURI(cfg.MongoURI)
+	clientOptions := options.Client().ApplyURI(cfg.BASE_URL)
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.Background(), clientOptions)
@@ -27,9 +27,9 @@ func ConnectDatabase(cfg config.Config) (*mongo.Database, error) {
 		return nil, fmt.Errorf("failed to ping MongoDB server: %v", err)
 	}
 
-	// make these as a monog db 
+	// make these as a monog db
 	// Set global variable for MongoDB database
-	DB = client.Database(cfg.MongoDBName)
+	DB = client.Database(cfg.DBName)
 
 	return DB, nil
 }

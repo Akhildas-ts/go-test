@@ -9,8 +9,8 @@ type SignupDetail struct {
 }
 type SignupDetailResponse struct {
 	ID        int    `json:"id"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
+	FirstName string `json:"firstname"`
+	LastName  string `json:"lastname"`
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`
 }
