@@ -1,29 +1,34 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"lock/config"
-	"lock/domain"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var DB *gorm.DB
+var DB *mongo.Database
 
-func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
-	psqlInfo := fmt.Sprintf("host=%s user=%s dbname=%s port=%s password=%s",
-		cfg.DBHost, cfg.DBUser, cfg.DBName, cfg.DBPort, cfg.DBPassword)
+func ConnectDatabase(cfg config.Config) (*mongo.Database, error) {
+	// Set up MongoDB client options
+	clientOptions := options.Client().ApplyURI(cfg.MongoURI)
 
-	db, err := gorm.Open(postgres.New(postgres.Config{
-		DSN: psqlInfo,
-	}), &gorm.Config{})
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to the database: %v", err)
+		return nil, fmt.Errorf("failed to connect to MongoDB: %v", err)
 	}
 
-	DB = db
+	// Ping the MongoDB server
+	err = client.Ping(context.Background(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to ping MongoDB server: %v", err)
+	}
 
-	DB.AutoMigrate(&domain.User{})
+	// Set global variable for MongoDB database
+	DB = client.Database(cfg.MongoDBName)
+
 	return DB, nil
 }
