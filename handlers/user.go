@@ -12,6 +12,8 @@ import (
 
 func SignUp(c *gin.Context) {
 
+
+	// signup 
 	var usersign models.SignupDetail
 
 	if err := c.ShouldBindJSON(&usersign); err != nil {

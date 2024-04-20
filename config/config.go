@@ -1,6 +1,5 @@
 package config
 
-//used to store env 
 
 import (
 	"github.com/go-playground/validator/v10"
