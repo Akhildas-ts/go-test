@@ -1,5 +1,7 @@
 package config
 
+//used to store env 
+
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"

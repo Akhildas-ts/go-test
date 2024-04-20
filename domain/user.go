@@ -4,6 +4,8 @@ import "gorm.io/gorm"
 
 var DB *gorm.Model
 
+// domain json 
+
 type User struct {
 	*gorm.Model `json:"-"`
 	ID          uint   `json:"id" gorm:"unique;not null"`
