@@ -7,6 +7,8 @@ type Response struct {
 	Error      interface{} `json:"error"`
 }
 
+// response we are giving to 
+
 type SuccesResponse struct {
 	Statuscode int    `json:"status_code"`
 	Message    string `json:"message"`

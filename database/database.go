@@ -27,6 +27,7 @@ func ConnectDatabase(cfg config.Config) (*mongo.Database, error) {
 		return nil, fmt.Errorf("failed to ping MongoDB server: %v", err)
 	}
 
+	// make these as a monog db 
 	// Set global variable for MongoDB database
 	DB = client.Database(cfg.MongoDBName)
 
