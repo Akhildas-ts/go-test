@@ -48,8 +48,6 @@ func GenerateTokenUsers(userId int, userEmail string, expirationTime time.Time) 
 
 	fmt.Println("claims data", claims.Id, claims.Email)
 
-
-	
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		fmt.Println("Error generating ECDSA key:", err)

@@ -1,35 +1,64 @@
 package database
 
 import (
-	"context"
 	"fmt"
 	"lock/config"
+	"lock/domain"
+	"log"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var DB *mongo.Database
+var DB *gorm.DB
 
-func ConnectDatabase(cfg config.Config) (*mongo.Database, error) {
-	// Set up MongoDB client options
-	clientOptions := options.Client().ApplyURI(cfg.BASE_URL)
+func InitDB(cfg config.Config) {
 
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.Background(), clientOptions)
+	dsn := fmt.Sprintf("host=%s user=%s dbname=%s port=%s password=%s",
+		cfg.DBHost,
+		cfg.DBUser,
+		cfg.DBName,
+		cfg.DBPort,
+		cfg.DBPassword,
+	)
+	var err error
+
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to MongoDB: %v", err)
+
+		log.Fatal("Failid to connec database ", err)
 	}
 
-	// Ping the MongoDB server
-	err = client.Ping(context.Background(), nil)
+	sqlDB, err := DB.DB()
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to ping MongoDB server: %v", err)
+
+		log.Fatal("Failed to get database object ", err)
 	}
 
-	// make these as a monog db
-	// Set global variable for MongoDB database
-	DB = client.Database(cfg.DBName)
+	err = sqlDB.Ping()
+
+	if err != nil {
+
+		log.Fatal("Falied  to ping the database ")
+	}
+
+	log.Println("Databse connection was success fully ")
+}
+
+func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
+	psqlInfo := fmt.Sprintf("host=%s user=%s dbname=%s port=%s password=%s", cfg.DBHost, cfg.DBUser, cfg.DBName, cfg.DBPort, cfg.DBPassword)
+
+	db, dberr := gorm.Open(postgres.Open(psqlInfo), &gorm.Config{})
+	if dberr != nil {
+
+		return nil, fmt.Errorf("faild to connect to database:%w", dberr)
+	}
+
+	DB = db
+	DB.AutoMigrate(&domain.User{})
+	db.AutoMigrate(&domain.Admin{})
 
 	return DB, nil
 }

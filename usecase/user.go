@@ -12,120 +12,137 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func UsersignUp(user models.SignupDetail) (*models.TokenUser, error) {
-
-	email, err := repository.CheckingEmailValidation(user.Email)
-
-	if err != nil {
-		return &models.TokenUser{}, errors.New("error with the singup server")
-	}
-
-	if email != nil {
-		return &models.TokenUser{}, errors.New("email is already exist ")
-	}
-
-	phone, err := repository.ChechingPhoneExist(user.Phone)
-
-	if err != nil {
-		return &models.TokenUser{}, errors.New("error with the phone number")
-	}
-
-	if phone != nil {
-		return &models.TokenUser{}, errors.New("phone number is already exist")
-	}
-
-	hashPassword, err := helper.PasswordHasing(user.Password)
-
-	if err != nil {
-
-		return &models.TokenUser{}, errors.New("hash password issue")
-	}
-
-	user.Password = hashPassword
-
-	dataInsert, err := repository.SignupInsert(user)
-
-	if err != nil {
-		return &models.TokenUser{}, errors.New("cloud not add user")
-	}
-	fmt.Println("inseted data are", dataInsert)
-	refresh, err := helper.GenerateRefreshToken(dataInsert)
-
-	if err != nil {
-		return &models.TokenUser{}, err
-	}
-	accessToken, err := helper.GenerateAccessToken(dataInsert)
-
-	if err != nil {
-		return &models.TokenUser{}, errors.New("issue from acces token ")
-
-	}
-
-	return &models.TokenUser{
-		Users:       dataInsert,
-		AccesToken:  accessToken,
-		RefresToken: refresh,
-	}, nil
-
+type UserUsecase struct {
+	UserRepo *repository.UserRepoImpl
 }
 
-func LoginUser(login models.LoginDetails) (*models.TokenUser, error) {
+func UseruseCase(repo repository.UserRepoImpl) *UserUsecase {
+	return &UserUsecase{UserRepo: &repo}
+}
 
-	_, err := mail.ParseAddress(login.Email)
+func (uc *UserUsecase) UserLogged(user models.LoginDetails) (*models.TokenUser, error) {
 
+	_, err := mail.ParseAddress(user.Email)
 	if err != nil {
-		return &models.TokenUser{}, errors.New("email should be correct formate")
+
+		return &models.TokenUser{}, errors.New("EMAIL SHOULD BE CORRECT FORMAT ")
+
 	}
 
-	email, err := repository.CheckingEmailValidation(login.Email)
+	email, err := uc.UserRepo.CheckingEmailValidation(user.Email)
 
 	if err != nil {
-		return &models.TokenUser{}, err
+		return &models.TokenUser{}, errors.New("SERVER ERROR  from : checking-email-validation")
+
 	}
 
 	if email == nil {
-		return &models.TokenUser{}, errors.New("email is not found")
+		return &models.TokenUser{}, errors.New("eroor email not found ")
+
 	}
 
-	userDetails, err := repository.FindUserDetailByEmail(login)
-
+	userDetails, err := uc.UserRepo.FindUserDetailByEmail(user)
 	if err != nil {
 		return &models.TokenUser{}, err
+
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(userDetails.Password), []byte(login.Passoword))
+	// CHECKING THE HASSED PASSWORD
+
+	err = bcrypt.CompareHashAndPassword([]byte(userDetails.Password), []byte(user.Passoword))
+	if err != nil {
+		fmt.Println("HEyyyy")
+		return &models.TokenUser{}, errors.New("hassed password not matching")
+	}
+	var user_details models.SignupDetailResponse
+
+	err = copier.Copy(&user_details, &userDetails)
 	if err != nil {
 
-		return &models.TokenUser{}, errors.New("password not matching")
-
+		return &models.TokenUser{}, errors.New("eorro in copier")
 	}
 
-	var user_details models.SignupDetailResponse
-	fmt.Println("user detials is ",userDetails)
-
-	err = copier.Copy(&user_details, userDetails)
-
-	if err != nil{
-		return &models.TokenUser{},err
-	}
-	fmt.Println("user_detials ",user_details)
+	// TOKEN....
 
 	accessToken, err := helper.GenerateAccessToken(user_details)
-
 	if err != nil {
-		return &models.TokenUser{}, err
+		return &models.TokenUser{}, errors.New("could not create accesstoken due to internal error")
 	}
-
 	refreshToken, err := helper.GenerateRefreshToken(user_details)
-
 	if err != nil {
-		return &models.TokenUser{}, err
+		return &models.TokenUser{}, errors.New("counldnt create refresh token due to error")
 	}
 
 	return &models.TokenUser{
 		Users:       user_details,
 		AccesToken:  accessToken,
 		RefresToken: refreshToken,
+	}, nil
+}
+
+func (uc *UserUsecase) UsersingUp(user models.SignupDetail) (*models.TokenUser, error) {
+
+	email, err := uc.UserRepo.CheckingEmailValidation(user.Email)
+
+	if err != nil {
+
+		return &models.TokenUser{}, errors.New("error with the singup server")
+
+	}
+
+	if email != nil {
+
+		return &models.TokenUser{}, errors.New("email is already exisit ")
+	}
+
+	phone, err := uc.UserRepo.CheckingPhoneExists(user.Phone)
+
+	if err != nil {
+
+		return &models.TokenUser{}, errors.New("p_server have issue ")
+
+	}
+	if phone != nil {
+		return &models.TokenUser{}, errors.New("phone number is already exist ")
+
+	}
+
+	//   Passoword Hash
+
+	hashedPassword, err := helper.PasswordHasing(user.Password)
+
+	if err != nil {
+		return &models.TokenUser{}, errors.New("hash_server have issue")
+	}
+
+	user.Password = hashedPassword
+
+	dataInsert, err := uc.UserRepo.SignupInsert(user)
+	if err != nil {
+		return &models.TokenUser{}, errors.New("could not add User ")
+	}
+
+	fmt.Println("data inserted in signup :", dataInsert)
+
+	// CREATING A JWT TOKEN FOR THE NEW USER\\
+
+	accessToken, err := helper.GenerateAccessToken(dataInsert)
+
+	if err != nil {
+		return &models.TokenUser{}, errors.New("can't create a acces token")
+	}
+
+	refershToken, err := helper.GenerateRefreshToken(dataInsert)
+
+	if err != nil {
+		return &models.TokenUser{}, errors.New("can't create a Refersh token")
+
+	}
+
+	return &models.TokenUser{
+		Users:       dataInsert,
+		AccesToken:  accessToken,
+		RefresToken: refershToken,
 	}, nil
 
 }

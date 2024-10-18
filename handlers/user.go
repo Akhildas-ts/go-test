@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"lock/models"
 	"lock/response"
 	"lock/usecase"
@@ -10,28 +11,35 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func SignUp(c *gin.Context) {
+type UserHandler struct {
+	Usecase usecase.UserUsecase
+}
 
+func NewUserHandler(uc usecase.UserUsecase) UserHandler {
 
-	// signup 
+	return UserHandler{Usecase: uc}
+}
+func (uc *UserHandler) Signup(c *gin.Context) {
+
 	var usersign models.SignupDetail
 
 	if err := c.ShouldBindJSON(&usersign); err != nil {
-
-		errRes := response.ClientResponse(http.StatusBadRequest, "field are provied wrong formate ", nil, err.Error())
+		errRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong formattttt 🙌", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
 		return
 
 	}
+
+	// CHEKING THE DATA ARE SENDED IN CORRECT FORMET OR NOT
 
 	if err := validator.New().Struct(usersign); err != nil {
 
-		errRes := response.ClientResponse(404, "they are  not in formate", nil, err.Error())
-
-		c.JSON(http.StatusBadRequest, errRes)
+		errres := response.ClientResponse(404, "They are not in format", nil, err.Error())
+		c.JSON(http.StatusBadGateway, errres)
 		return
 	}
-	usercreate, err := usecase.UsersignUp(usersign)
+
+	usercreate, err := uc.Usecase.UsersingUp(usersign)
 
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadGateway, "user signup format error ", nil, err.Error())
@@ -44,40 +52,42 @@ func SignUp(c *gin.Context) {
 
 }
 
-func Login(c *gin.Context) {
+func (uc *UserHandler) UserLoginWithPassword(c *gin.Context) {
 
-	var userLogin models.LoginDetails
+	var LoginUser models.LoginDetails
 
-	if err := c.ShouldBindJSON(&userLogin); err != nil {
-
-		errRes := response.ClientResponse(http.StatusBadRequest, "json formte was incorrect", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errRes)
+	if err := c.ShouldBindJSON(&LoginUser); err != nil {
+		erres := response.ClientResponse(http.StatusBadGateway, "Login field provided in wrong way ", nil, err.Error())
+		c.JSON(http.StatusBadGateway, erres)
 		return
+
 	}
 
-	if err := validator.New().Struct(userLogin); err != nil {
+	////////
+
+	if err := validator.New().Struct(LoginUser); err != nil {
 		erres := response.ClientResponse(http.StatusBadGateway, "Login field was wrong formate ahn", nil, err.Error())
 		c.JSON(http.StatusBadGateway, erres)
 		return
 	}
 
-	login, err := usecase.LoginUser(userLogin)
+	LogedUser, err := uc.Usecase.UserLogged(LoginUser)
+	if errors.Is(err, models.ErrEmailNotFound) {
 
-	if err != nil {
-
-		errRes := response.ClientResponse(http.StatusBadRequest, "login error", nil, err.Error())
-
-		c.JSON(http.StatusBadRequest, errRes)
+		erres := response.ClientResponse(http.StatusBadRequest, "invalid email", nil, err.Error())
+		c.JSON(http.StatusBadGateway, erres)
 		return
 	}
 
-	succesRes := response.ClientResponse(http.StatusOK, "login succesfully", login, nil)
-	c.JSON(http.StatusOK, succesRes)
+	if err != nil {
 
-}
+		erres := response.ClientResponse(500, "server error from usecase", nil, err.Error())
+		c.JSON(http.StatusBadGateway, erres)
+		return
+	}
 
-func SelectApp(c *gin.Context) {
+	successres := response.ClientResponse(http.StatusCreated, "succesed login user", LogedUser, nil)
 
-	
+	c.JSON(http.StatusOK, successres)
 
 }

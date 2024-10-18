@@ -1,118 +1,88 @@
 package repository
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"lock/database"
 	"lock/domain"
 	"lock/models"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 )
 
-func CheckingEmailValidation(email string) (*domain.User, error) {
+// Define UserRepo as an interface
+type UserRepoImpl struct {
+	DB *gorm.DB
+}
+
+func NewUserRepo(db *gorm.DB) *UserRepoImpl {
+	return &UserRepoImpl{DB: db}
+}
+
+func (ur *UserRepoImpl) CheckingEmailValidation(email string) (*domain.User, error) {
+
+	fmt.Println("INSIDE THE EMAIL VALID", email)
 
 	var user domain.User
 
-	// Get the users collection
-	collection := database.DB.Collection("users")
+	result := ur.DB.Where(&domain.User{Email: email}).First(&user)
+	fmt.Println("RESULT ::::", result)
 
-	// Search for the user with the given email
-	filter := bson.M{"email": email}
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 
-	// Execute the query
-	err := collection.FindOne(context.Background(), filter).Decode(&user)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, nil // User not found
+			fmt.Println(" TWO NIL NIL ")
+			return nil, nil
+
 		}
-		return nil, fmt.Errorf("error finding user: %v", err)
+		return nil, result.Error
 	}
-
-	fmt.Println("user details:", user)
+	fmt.Println("user details was :", user)
 	return &user, nil
 
 }
+func (ur *UserRepoImpl) CheckingPhoneExists(phone string) (*domain.User, error) {
 
-func ChechingPhoneExist(phone string) (*domain.User, error) {
 	var user domain.User
+	result := database.DB.Where(&domain.User{Phone: phone}).First(&user)
 
-	// Get the users collection
-	collection := database.DB.Collection("users")
-
-	// Define the filter to search for the user with the given phone
-	filter := bson.M{"phone": phone}
-
-	// Execute the query to find the user
-	err := collection.FindOne(context.Background(), filter).Decode(&user)
-	if err != nil {
-		// If no user is found, return nil
-		if err == mongo.ErrNoDocuments {
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		// If an error occurs during the query, return the error
-		return nil, fmt.Errorf("error finding user: %v", err)
-	}
 
-	// Return the user
+		return nil, result.Error
+	}
 	return &user, nil
+
 }
 
-func SignupInsert(user models.SignupDetail) (models.SignupDetailResponse, error) {
+func (ur *UserRepoImpl) SignupInsert(user models.SignupDetail) (models.SignupDetailResponse, error) {
 
 	var signupRes models.SignupDetailResponse
 
-	// Get the users collection
-	collection := database.DB.Collection("users")
+	err := database.DB.Raw("INSERT INTO users(firstname, lastname, email, phone, password) VALUES (?,?,?,?,?) RETURNING id,firstname,lastname,email,phone", user.FirstName, user.LastName, user.Email, user.Phone, user.Password).Scan(&signupRes).Error
 
-	// Define the document to insert
-	doc := bson.M{
-		"firstname": user.FirstName,
-		"lastname":  user.LastName,
-		"email":     user.Email,
-		"phone":     user.Phone,
-		"password":  user.Password,
-	}
-
-	// Insert the document
-	result, err := collection.InsertOne(context.Background(), doc)
 	if err != nil {
-		return models.SignupDetailResponse{}, fmt.Errorf("error inserting user: %v", err)
+		fmt.Println("ERROR FROM INSERTING DATA", err)
+		return models.SignupDetailResponse{}, err
 	}
 
-	// Set the response
-	signupRes.ID = result.InsertedID.(int)
-	signupRes.FirstName = user.FirstName
-	signupRes.LastName = user.LastName
-	signupRes.Email = user.Email
-	signupRes.Phone = user.Phone
-
-	fmt.Println("signup inserted data's are :", signupRes)
+	fmt.Println("AScle inserted data's are :", signupRes)
 	return signupRes, nil
 }
 
-func FindUserDetailByEmail(user models.LoginDetails) (models.UserLoginResponse, error) {
+func (ur *UserRepoImpl) FindUserDetailByEmail(user models.LoginDetails) (models.UserLoginResponse, error) {
 
-	var userDetails models.UserLoginResponse
+	var UserDetails models.UserLoginResponse
 
-	// Get the users collection
-	collection := database.DB.Collection("users")
+	err := database.DB.Raw(
+		`select * from users where email = ? and blocked = false`, user.Email).Scan(&UserDetails).Error
 
-	// Define the filter to search for the user with the given email
-	filter := bson.M{"email": user.Email, "blocked": false}
-
-	// Execute the query to find the user
-	err := collection.FindOne(context.Background(), filter).Decode(&userDetails)
 	if err != nil {
-		// If no user is found, return an empty response
-		if err == mongo.ErrNoDocuments {
-			return models.UserLoginResponse{}, nil
-		}
-		// If an error occurs during the query, return the error
-		return models.UserLoginResponse{}, fmt.Errorf("error finding user: %v", err)
+		return models.UserLoginResponse{}, errors.New("got an error fron ! searching users by email")
+
 	}
 
-	// Return the user details
-	return userDetails, nil
+	return UserDetails, nil
 }
