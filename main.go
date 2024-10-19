@@ -1,13 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"lock/config"
 	"lock/database"
 	"lock/handlers"
 	"lock/repository"
 	routes "lock/router"
 	"lock/usecase"
-	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,19 +18,19 @@ func main() {
 
 	if err != nil {
 
-		log.Fatalf("rror found on config connectoin", err)
+		fmt.Println("Error on config ", err)
 	}
 
 	db, err := database.ConnectDatabase(cfg)
 
 	if err != nil {
 
-		log.Fatalf("rror found on connectoin of database ", err)
+		fmt.Println("rror found on connectoin of database ", err)
 	}
 
 	ur := repository.NewUserRepo(db)
-	uc := usecase.UseruseCase(*ur)
-	uh := handlers.NewUserHandler(*uc)
+	uc := usecase.UseruseCase(ur)
+	uh := handlers.NewUserHandler(uc)
 	router := gin.Default()
 
 	routes.UserRoutes(router.Group("/"), db, uh)

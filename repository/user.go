@@ -10,6 +10,13 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserRepo interface {
+	CheckingEmailValidation(email string) (*domain.User, error)
+	CheckingPhoneExists(phone string) (*domain.User, error)
+	SignupInsert(user models.SignupDetail) (models.SignupDetailResponse, error)
+	FindUserDetailByEmail(user models.LoginDetails) (models.UserLoginResponse, error)
+}
+
 // Define UserRepo as an interface
 type UserRepoImpl struct {
 	DB *gorm.DB
@@ -21,17 +28,17 @@ func NewUserRepo(db *gorm.DB) *UserRepoImpl {
 
 func (ur *UserRepoImpl) CheckingEmailValidation(email string) (*domain.User, error) {
 
-	fmt.Println("INSIDE THE EMAIL VALID", email)
-
 	var user domain.User
 
 	result := ur.DB.Where(&domain.User{Email: email}).First(&user)
-	fmt.Println("RESULT ::::", result)
+	fmt.Printf("Executed SQL: %s\n", result.Statement.SQL.String())
 
 	if result.Error != nil {
+
+		fmt.Println("RESULT. ERROR ", result.Error)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 
-			fmt.Println(" TWO NIL NIL ")
+			fmt.Println("Email is not found ")
 			return nil, nil
 
 		}
@@ -41,13 +48,20 @@ func (ur *UserRepoImpl) CheckingEmailValidation(email string) (*domain.User, err
 	return &user, nil
 
 }
+
 func (ur *UserRepoImpl) CheckingPhoneExists(phone string) (*domain.User, error) {
 
 	var user domain.User
+
+	fmt.Println("CHECKING PHONE EXIST FUNCTION EXISTS .... ")
 	result := database.DB.Where(&domain.User{Phone: phone}).First(&user)
 
+	fmt.Println("phone function exist >>>>")
+
 	if result.Error != nil {
+		fmt.Println("RESULT .ERROR FORM PHONE . ", result.Error)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			fmt.Println("NOT FOUND PHONE NUMBER IN DB  >>> ")
 			return nil, nil
 		}
 

@@ -13,11 +13,11 @@ import (
 )
 
 type UserUsecase struct {
-	UserRepo *repository.UserRepoImpl
+	UserRepo repository.UserRepo
 }
 
-func UseruseCase(repo repository.UserRepoImpl) *UserUsecase {
-	return &UserUsecase{UserRepo: &repo}
+func UseruseCase(repo repository.UserRepo) UserUsecase {
+	return UserUsecase{UserRepo: repo}
 }
 
 func (uc *UserUsecase) UserLogged(user models.LoginDetails) (*models.TokenUser, error) {
@@ -86,7 +86,7 @@ func (uc *UserUsecase) UsersingUp(user models.SignupDetail) (*models.TokenUser, 
 
 	if err != nil {
 
-		return &models.TokenUser{}, errors.New("error with the singup server")
+		return &models.TokenUser{}, err
 
 	}
 
