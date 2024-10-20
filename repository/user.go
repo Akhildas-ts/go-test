@@ -17,7 +17,6 @@ type UserRepo interface {
 	FindUserDetailByEmail(user models.LoginDetails) (models.UserLoginResponse, error)
 }
 
-// Define UserRepo as an interface
 type UserRepoImpl struct {
 	DB *gorm.DB
 }
@@ -35,10 +34,8 @@ func (ur *UserRepoImpl) CheckingEmailValidation(email string) (*domain.User, err
 
 	if result.Error != nil {
 
-		fmt.Println("RESULT. ERROR ", result.Error)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 
-			fmt.Println("Email is not found ")
 			return nil, nil
 
 		}
@@ -53,13 +50,10 @@ func (ur *UserRepoImpl) CheckingPhoneExists(phone string) (*domain.User, error) 
 
 	var user domain.User
 
-	fmt.Println("CHECKING PHONE EXIST FUNCTION EXISTS .... ")
 	result := database.DB.Where(&domain.User{Phone: phone}).First(&user)
 
-	fmt.Println("phone function exist >>>>")
-
 	if result.Error != nil {
-		fmt.Println("RESULT .ERROR FORM PHONE . ", result.Error)
+
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			fmt.Println("NOT FOUND PHONE NUMBER IN DB  >>> ")
 			return nil, nil

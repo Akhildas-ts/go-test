@@ -80,6 +80,21 @@ func (mr *MockUserRepoMockRecorder) FindUserDetailByEmail(user interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindUserDetailByEmail", reflect.TypeOf((*MockUserRepo)(nil).FindUserDetailByEmail), user)
 }
 
+// PasswordHasing mocks base method.
+func (m *MockUserRepo) PasswordHasing(password string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PasswordHasing", password)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PasswordHasing indicates an expected call of PasswordHasing.
+func (mr *MockUserRepoMockRecorder) PasswordHasing(password interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PasswordHasing", reflect.TypeOf((*MockUserRepo)(nil).PasswordHasing), password)
+}
+
 // SignupInsert mocks base method.
 func (m *MockUserRepo) SignupInsert(user models.SignupDetail) (models.SignupDetailResponse, error) {
 	m.ctrl.T.Helper()
