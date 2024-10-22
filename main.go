@@ -33,7 +33,7 @@ func main() {
 	uh := handlers.NewUserHandler(uc)
 	router := gin.Default()
 
-	fmt.Println("hssd")
+	fmt.Println("hsd")
 	routes.UserRoutes(router.Group("/"), db, uh)
 
 	router.Run()
