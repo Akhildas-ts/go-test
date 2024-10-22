@@ -55,20 +55,20 @@ jobs:
             akhildasts/${{ env.IMAGE_NAME }}:latest
         continue-on-error: false  # Stop the workflow if this step fails
 
-      # New steps to handle SSH key
-      - name: Create .ssh directory
-        run: mkdir -p ~/.ssh
+    #   # New steps to handle SSH key
+    #   - name: Create .ssh directory
+    #     run: mkdir -p ~/.ssh
 
-      - name: Add SSH private key
-        run: |
-          echo "${{ secrets.HOST_SSH }}" | tr -d '\r' > ~/.ssh/id_rsa
+    #   - name: Add SSH private key
+    #     run: |
+    #       echo "${{ secrets.HOST_SSH }}" | tr -d '\r' > ~/.ssh/id_rsa
           
-      - name: Adjust SSH key permissions
-        run: chmod 600 ~/.ssh/id_rsa
+    #   - name: Adjust SSH key permissions
+    #     run: chmod 600 ~/.ssh/id_rsa
 
-      - name: Debug SSH command
-        run: |
-          echo "Trying to connect to EC2 instance at ${ { secrets.EC2_HOST }} as ${ { secrets.EC2_USERNAME }}"
+    #   - name: Debug SSH command
+    #     run: |
+    #       echo "Trying to connect to EC2 instance at ${ { secrets.EC2_HOST }} as ${ { secrets.EC2_USERNAME }}"
 
       - name: SSH into EC2 and run Docker commands
         uses: appleboy/ssh-action@v0.1.0  # Specify a version instead of master
