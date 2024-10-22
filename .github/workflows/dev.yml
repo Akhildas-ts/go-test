@@ -34,8 +34,9 @@ jobs:
 
       - name: Test DNS Resolution
         run: |
-          nslookup ${{ secrets.EC2_HOST }}
+          nslookup ${{ secrets.EC2_HOST }} 8.8.8.8  # Using Google DNS
           ping -c 4 ${{ secrets.EC2_HOST }}
+
 
 
       - name: Set up Docker Buildx
