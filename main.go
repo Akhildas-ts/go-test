@@ -25,7 +25,7 @@ func main() {
 
 	if err != nil {
 
-		fmt.Println("Error found on connectoin of database ", err)
+		fmt.Println("rror found on connectoin of database ", err)
 	}
 
 	ur := repository.NewUserRepo(db)
