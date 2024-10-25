@@ -18,7 +18,7 @@ func main() {
 
 	if err != nil {
 
-		fmt.Println("rror on config ", err)
+		fmt.Println("Error on config ", err)
 	}
 
 	db, err := database.ConnectDatabase(cfg)

@@ -51,7 +51,6 @@ jobs:
                       akhildasts/${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
                       akhildasts/${{ env.IMAGE_NAME }}:latest
                   continue-on-error: false  # Stop the workflow if this step fails
-
                 - name: SSH into EC2 and run Docker commands
                   uses: appleboy/ssh-action@master
                   with:
@@ -62,22 +61,24 @@ jobs:
                       echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
                 
                       # Stop and remove any running container with the same name
-
                       if [ "$(docker ps -q -f name=${{ env.REPO }})" ]; then
                         docker stop ${{ env.REPO }}
                         docker rm -f ${{ env.REPO }}
+                        sleep 5  # Wait briefly to ensure removal
                       fi
                 
+                      # Clean up any stopped containers
+                      docker container prune -f
+                
                       # Remove old image if it exists
-
                       if [ "$(docker images -q ${{ env.REPO }}/${{ env.IMAGE_NAME }}:latest)" ]; then
                         docker rmi -f ${{ env.REPO }}/${{ env.IMAGE_NAME }}:latest
                       fi
                 
                       # Run the new container using the 'latest' tag
-                      
                       docker run -p 8000:8000 -d \
                       --restart always \
                       --name ${{ env.REPO }} \
                       ${{ env.REPO }}/${{ env.IMAGE_NAME }}:latest
+                
                 
