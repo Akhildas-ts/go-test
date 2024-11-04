@@ -1,0 +1,104 @@
+# PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: psql-deployment
+  labels:
+    app: psql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psql
+  template:
+    metadata:
+      labels:
+        app: psql
+    spec:
+      containers:
+      - name: psql
+        image: postgres
+        ports:
+        - containerPort: 5432
+        env:  # Adjusted indentation here
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: psql-secret
+                key: psql-user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: psql-secret
+                key: psql-password
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: psql-secret
+                key: psql-db
+
+---
+
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: psql-service
+spec:
+  type: ClusterIP
+  selector:
+    app: psql
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+
+
+
+# #here we create deployment and service the psql 
+# # kind - deployment - blueprint of pods  - template -14 configure the pod 
+#  apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: psql-deployment
+#   labels:  # we can give any k8s compounent as lables, a key value pairs that are attaches k8s resourse 
+#     app: psql
+# spec:
+#   replicas: 1
+#   selector:  # which pods belongs to do deployement ? 11 - 13 used to match all pod with label 
+#     matchLabels:
+#       app: psql
+#   template:
+#     metadata:
+#       labels:
+#         app: psql
+#     spec:
+#       containers:
+#       - name: psql
+#         image: postgres
+#         ports:
+#         - containerPort: 5432
+#         env:
+#             - name: PSQL_USER
+#               valueFrom: 
+#                 secretKeyRef:
+#                   name: psql-secret
+#                   key: psql-user
+#             - name: PSQL_PASSWORD
+#               valueFrom: 
+#                 secretKeyRef:
+#                   name: psql-secret
+#                   key: psql-password
+# ___
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: psql-service
+# spec:
+#   selector:
+#     app: psql #which port need to run 
+#   ports:
+#     - protocol: TCP
+#       port: 5432
+#       targetPort: 5432  #alwas be the container port 

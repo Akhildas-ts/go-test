@@ -16,6 +16,8 @@ WORKDIR /app
 
 COPY --from=build-stage /test /test
 
+COPY .env /app/.env
+
 EXPOSE 8080
 
 USER nonroot:nonroot

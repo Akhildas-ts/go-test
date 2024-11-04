@@ -1,0 +1,143 @@
+# Golock Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: golock-deployment
+  labels:
+    app: golock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: golock
+  template:
+    metadata:
+      labels:
+        app: golock
+    spec:  # Moved this line down one indentation level
+      
+      containers:
+      - name: golock
+        image: akhildasts/test:v2
+        ports:
+        - containerPort: 8080
+        env:
+          - name: DB_USER
+            valueFrom: 
+              secretKeyRef:
+                name: psql-secret
+                key: psql-user
+          - name: DB_PASSWORD
+            valueFrom: 
+              secretKeyRef:
+                name: psql-secret
+                key: psql-password
+          - name: DB_NAME
+            valueFrom: 
+              secretKeyRef:
+                name: psql-secret
+                key: psql-db
+          - name: DB_HOST
+            valueFrom: 
+              configMapKeyRef:
+                name: psql-config
+                key: psql-url
+          - name: DB_PORT
+            valueFrom: 
+              configMapKeyRef:
+                name: psql-config
+                key: psql-port
+
+---
+
+# Golock Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: golock-service
+spec:
+  type: NodePort
+  selector:
+    app: golock
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30100
+
+
+
+# #here we create deployment and service the psql 
+# # kind - deployment - blueprint of pods  - template -14 configure the pod 
+
+
+#  apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: golock-deployment
+#   labels:  # we can give any k8s compounent as lables, a key value pairs that are attaches k8s resourse 
+#     app: golock
+# spec:
+#   replicas: 1
+#   selector:  # which pods belongs to do deployement ? 11 - 13 used to match all pod with label 
+#     matchLabels:
+#       app: golock
+#   template:
+#     metadata:
+#       labels:
+#         app: golock
+#     spec:
+#       containers:
+#       - name: golock
+#         image: akhildasts/test:v2 
+#         ports:
+#         - containerPort: 5432
+#         env:
+#            env:
+#             - name: DB_USER
+#               valueFrom: 
+#                 secretKeyRef:
+#                   name: psql-secret
+#                   key: psql-user
+#             - name: DB_PASSWORD
+#               valueFrom: 
+#                 secretKeyRef:
+#                   name: psql-secret
+#                   key: psql-password
+#             - name: DB_NAME
+#               valueFrom: 
+#                 secretKeyRef:
+#                   name: psql-secret
+#                   key: psql-db
+#                   - name: psql-config
+#               valueFrom: 
+#                 secretKeyRef:
+#                   name: psql-config
+#                   key: psql-url
+#             # - name: DB_HOST
+#             #   valueFrom:
+#             #     configMapKeyRef:
+#             #       name: postgres-congif
+#             #       key: postgres-host
+#             # - name: DB_PORT
+#             #   valueFrom:
+#             #     configMapKeyRef:
+#             #       name: postgres-congifmap
+#             #       key: postgres-port
+       
+          
+# ___
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: golock-service
+# spec:
+# type: NodePort
+#   selector:
+#     app: golock  #which port need to run 
+#   ports:
+#     - protocol: TCP
+#       port: 5432
+#       targetPort: 5432  #alwas be the container port 
+#        nodePort:  30100  #will opent on the k8s nodes on which the application will be accessible

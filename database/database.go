@@ -4,49 +4,47 @@ import (
 	"fmt"
 	"lock/config"
 	"lock/domain"
-	"log"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
 
-func InitDB(cfg config.Config) {
+// func InitDB(cfg config.Config) {
 
-	dsn := fmt.Sprintf("host=%s user=%s dbname=%s port=%s password=%s",
-		cfg.DBHost,
-		cfg.DBUser,
-		cfg.DBName,
-		cfg.DBPort,
-		cfg.DBPassword,
-	)
-	var err error
+// 	dsn := fmt.Sprintf("host=%s user=%s dbname=%s port=%s password=%s",
+// 		cfg.DBHost,
+// 		cfg.DBUser,
+// 		cfg.DBName,
+// 		cfg.DBPort,
+// 		cfg.DBPassword,
+// 	)
+// 	var err error
 
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
+// 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
 
-	if err != nil {
+// 	if err != nil {
 
-		log.Fatal("Failid to connec database ", err)
-	}
+// 		log.Fatal("Failid to connec database ", err)
+// 	}
 
-	sqlDB, err := DB.DB()
+// 	sqlDB, err := DB.DB()
 
-	if err != nil {
+// 	if err != nil {
 
-		log.Fatal("Failed to get database object ", err)
-	}
+// 		log.Fatal("Failed to get database object ", err)
+// 	}
 
-	err = sqlDB.Ping()
+// 	err = sqlDB.Ping()
 
-	if err != nil {
+// 	if err != nil {
 
-		log.Fatal("Falied  to ping the database ")
-	}
+// 		log.Fatal("Falied  to ping the database ")
+// 	}
 
-	log.Println("Databse connection was success fully ")
-}
+// 	log.Println("Databse connection was success fully ")
+// }
 
 func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s user=%s dbname=%s port=%s password=%s", cfg.DBHost, cfg.DBUser, cfg.DBName, cfg.DBPort, cfg.DBPassword)
