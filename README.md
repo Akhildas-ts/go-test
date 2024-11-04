@@ -17,9 +17,6 @@ Make sure you have the following installed:
 - **Helm** (if you're using it for K8s deployment)
 - **Git** (for version control)
 
-## Setup Instructions
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/Akhildas-ts/e-commerce-k8s-go.git
-cd e-commerce-k8s-go
+
+
